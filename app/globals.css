@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --crop-size: 14px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F6F3EC;
+  color: #1B1B1B;
+}
+
+::selection {
+  background-color: #C08A2E;
+  color: #12213A;
+}
+
+*:focus-visible {
+  outline: 2px solid #C08A2E;
+  outline-offset: 2px;
+}
+
+/* Registration crop-marks: the signature structural device.
+   Frames hero art / key cards like the corner marks on an actual
+   printed press sheet. Used deliberately, not on every element. */
+.crop-frame {
+  position: relative;
+}
+.crop-frame::before,
+.crop-frame::after,
+.crop-frame > .crop-tl,
+.crop-frame > .crop-br {
+  content: '';
+  position: absolute;
+  width: var(--crop-size);
+  height: var(--crop-size);
+  pointer-events: none;
+}
+.crop-frame::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid #C08A2E;
+  border-left: 2px solid #C08A2E;
+}
+.crop-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid #C08A2E;
+  border-right: 2px solid #C08A2E;
+}
+
+.crop-frame > .crop-tl {
+  top: -1px;
+  right: -1px;
+  border-top: 2px solid #C08A2E;
+  border-right: 2px solid #C08A2E;
+}
+.crop-frame > .crop-br {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 2px solid #C08A2E;
+  border-left: 2px solid #C08A2E;
+}
+
+/* Registration-mark dot: a small reference mark used once per section,
+   evoking a printer's color-registration target. */
+.reg-mark {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid #B23A2E;
+  position: relative;
+}
+.reg-mark::before,
+.reg-mark::after {
+  content: '';
+  position: absolute;
+  background: #B23A2E;
+}
+.reg-mark::before {
+  left: 50%;
+  top: -4px;
+  width: 1.5px;
+  height: 4px;
+  transform: translateX(-50%);
+}
+.reg-mark::after {
+  left: -4px;
+  top: 50%;
+  width: 4px;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 bg-brass text-ink-dark font-semibold px-6 py-3 rounded-sm hover:bg-brass-light transition-colors duration-150;
+}
+
+.btn-outline {
+  @apply inline-flex items-center gap-2 border border-ink/25 text-ink font-medium px-6 py-3 rounded-sm hover:border-ink transition-colors duration-150;
+}
+
+.btn-ghost-paper {
+  @apply inline-flex items-center gap-2 border border-paper/40 text-paper font-medium px-6 py-3 rounded-sm hover:bg-paper/10 transition-colors duration-150;
+}
+
+.field-label {
+  @apply block text-sm font-medium text-ink mb-1.5;
+}
+
+.field-input {
+  @apply w-full border border-ink/20 bg-white/60 rounded-sm px-4 py-2.5 text-charcoal placeholder:text-charcoal/40 focus:border-brass focus:bg-white transition-colors duration-150;
+}
+
+.field-textarea {
+  @apply w-full border border-ink/20 bg-white/60 rounded-sm px-4 py-2.5 text-charcoal placeholder:text-charcoal/40 focus:border-brass focus:bg-white transition-colors duration-150 min-h-[120px];
+}
