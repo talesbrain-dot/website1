@@ -1,5 +1,6 @@
 import ContactForm from '@/components/ContactForm';
 import { contactInfo } from '@/lib/content';
+import { PhoneIcon, MailIcon, MapPinIcon, WhatsAppIcon } from '@/components/icons';
 
 export const metadata = {
   title: 'Contact | Kamboj Press',
@@ -21,21 +22,27 @@ export default function ContactPage() {
 
         <dl className="space-y-5 mb-10">
           <div className="flex items-start gap-4">
-            <span className="reg-mark mt-1.5 shrink-0" />
+            <span className="w-9 h-9 rounded-full bg-brass/10 text-brass-dark flex items-center justify-center shrink-0">
+              <PhoneIcon className="w-4 h-4" />
+            </span>
             <div>
               <dt className="text-xs text-ink/50">Phone</dt>
               <dd><a href={`tel:${contactInfo.phone}`} className="text-ink font-medium">{contactInfo.phone}</a></dd>
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <span className="reg-mark mt-1.5 shrink-0" />
+            <span className="w-9 h-9 rounded-full bg-brass/10 text-brass-dark flex items-center justify-center shrink-0">
+              <MailIcon className="w-4 h-4" />
+            </span>
             <div>
               <dt className="text-xs text-ink/50">Email</dt>
               <dd><a href={`mailto:${contactInfo.email}`} className="text-ink font-medium">{contactInfo.email}</a></dd>
             </div>
           </div>
           <div className="flex items-start gap-4">
-            <span className="reg-mark mt-1.5 shrink-0" />
+            <span className="w-9 h-9 rounded-full bg-brass/10 text-brass-dark flex items-center justify-center shrink-0">
+              <MapPinIcon className="w-4 h-4" />
+            </span>
             <div>
               <dt className="text-xs text-ink/50">Address</dt>
               <dd className="text-ink font-medium max-w-[32ch]">{contactInfo.address}</dd>
@@ -44,8 +51,12 @@ export default function ContactPage() {
         </dl>
 
         <div className="flex flex-wrap gap-4 mb-10">
-          <a href={contactInfo.whatsapp} target="_blank" rel="noreferrer" className="btn-outline">WhatsApp us</a>
-          <a href={contactInfo.mapsUrl} target="_blank" rel="noreferrer" className="btn-outline">Get directions</a>
+          <a href={contactInfo.whatsapp} target="_blank" rel="noreferrer" className="btn-outline">
+            <WhatsAppIcon className="w-4 h-4" /> WhatsApp us
+          </a>
+          <a href={contactInfo.mapsUrl} target="_blank" rel="noreferrer" className="btn-outline">
+            <MapPinIcon className="w-4 h-4" /> Get directions
+          </a>
         </div>
 
         <div className="crop-frame border border-ink/10 h-[260px] overflow-hidden">

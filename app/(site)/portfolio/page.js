@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { portfolioItems } from '@/lib/content';
+import { ProductIllustration } from '@/components/ProductIcons';
 
 export const metadata = {
   title: 'Portfolio | Kamboj Press',
@@ -25,13 +26,17 @@ export default function PortfolioPage() {
       <section className="max-w-content mx-auto px-5 py-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {portfolioItems.map((item) => (
-            <div key={item.name} className="border border-ink/10 bg-white/40">
-              <div className="aspect-[4/3] bg-ink/[0.06] border-b border-ink/10" />
+            <Link key={item.name} href={`/products/${item.slug}`} className="card-lift group border border-ink/10 bg-white/40 hover:border-brass">
+              <div className="aspect-[4/3] bg-paper-dark border-b border-ink/10 flex items-center justify-center p-10">
+                <div className="w-full h-full text-ink/70 group-hover:text-brass-dark transition-colors">
+                  <ProductIllustration icon={item.icon} className="w-full h-full" />
+                </div>
+              </div>
               <div className="p-5">
                 <h3 className="font-medium text-ink">{item.name}</h3>
                 <p className="text-sm text-ink/55 mt-1">{item.category}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

@@ -1,14 +1,17 @@
 import Link from 'next/link';
-import { categories, whyPoints, portfolioItems, contactInfo } from '@/lib/content';
+import { categories, whyPoints, portfolioItems, contactInfo, reviews } from '@/lib/content';
+import { ProductIllustration } from '@/components/ProductIcons';
+import { ArrowRightIcon } from '@/components/icons';
 
 export default function HomePage() {
   return (
     <>
-      {/* HERO — signature moment: an abstract CMYK color-separation mark stands
-          in for a photo, framed with the registration crop marks. */}
+      {/* HERO — signature moment: a grid of real product illustrations,
+          framed with registration crop marks, replacing an abstract motif
+          with imagery that actually shows what the press makes. */}
       <section className="relative overflow-hidden border-b border-ink/10">
         <div className="max-w-content mx-auto px-5 pt-14 pb-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
-          <div>
+          <div className="animate-fade-up">
             <div className="flex items-center gap-2 text-sm text-ink/60 mb-6">
               <span className="reg-mark" />
               A complete printing solution · Dehradun
@@ -41,10 +44,10 @@ export default function HomePage() {
             </dl>
           </div>
 
-          <div className="crop-frame">
+          <div className="crop-frame animate-fade-up" style={{ animationDelay: '120ms' }}>
             <span className="crop-tl" />
             <span className="crop-br" />
-            <HeroMark />
+            <HeroCollage />
           </div>
         </div>
       </section>
@@ -87,14 +90,18 @@ export default function HomePage() {
             <Link
               key={cat.slug}
               href={`/services#${cat.slug}`}
-              className="group border border-ink/12 bg-white/40 p-6 flex flex-col justify-between min-h-[220px] hover:border-brass hover:bg-white transition-colors"
+              className="card-lift group border border-ink/12 bg-white/40 p-6 flex flex-col justify-between min-h-[240px] hover:border-brass hover:bg-white"
             >
               <div>
+                <div className="w-11 h-11 text-ink/70 group-hover:text-brass-dark transition-colors mb-4">
+                  <ProductIllustration icon={cat.icon} className="w-full h-full" />
+                </div>
                 <h3 className="font-display text-xl text-ink font-medium mb-2">{cat.label}</h3>
                 <p className="text-sm text-ink/65 leading-relaxed">{cat.tagline}</p>
               </div>
-              <span className="text-sm font-medium text-brass-dark mt-6 group-hover:text-brass-dark">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-brass-dark mt-6">
                 Explore category
+                <ArrowRightIcon className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           ))}
@@ -144,15 +151,48 @@ export default function HomePage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {portfolioItems.slice(0, 5).map((item) => (
-            <div key={item.name} className="aspect-[4/5] bg-ink/[0.06] border border-ink/10 flex items-end p-4">
+            <Link
+              key={item.name}
+              href={`/products/${item.slug}`}
+              className="card-lift group aspect-[4/5] bg-white/50 border border-ink/10 flex flex-col justify-between p-4 hover:border-brass"
+            >
+              <div className="w-9 h-9 text-ink/60 group-hover:text-brass-dark transition-colors">
+                <ProductIllustration icon={item.icon} className="w-full h-full" />
+              </div>
               <span className="text-sm font-medium text-ink">{item.name}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* LOCATION */}
+      {/* REVIEWS */}
       <section className="border-t border-ink/10 bg-white/50">
+        <div className="max-w-content mx-auto px-5 py-16">
+          <p className="text-sm text-ink/55 mb-2">What customers say</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-ink font-medium max-w-[16ch] mb-10">
+            Trusted by businesses and families across Dehradun.
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {reviews.map((r) => (
+              <div key={r.name} className="card-lift border border-ink/12 bg-white p-6">
+                <div className="flex gap-1 mb-4" aria-label={`${r.rating} out of 5 stars`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <StarIcon key={i} filled={i < r.rating} />
+                  ))}
+                </div>
+                <p className="text-ink/75 leading-relaxed mb-5">&ldquo;{r.quote}&rdquo;</p>
+                <div>
+                  <p className="text-sm font-medium text-ink">{r.name}</p>
+                  <p className="text-xs text-ink/50">{r.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* LOCATION */}
+      <section className="border-t border-ink/10">
         <div className="max-w-content mx-auto px-5 py-16 grid lg:grid-cols-2 gap-10 items-center">
           <div>
             <p className="text-sm text-ink/55 mb-2">Find us in Dehradun</p>
@@ -217,34 +257,51 @@ export default function HomePage() {
 
 function QuickPath({ href, title, body }) {
   return (
-    <Link href={href} className="group border border-ink/12 p-6 bg-white/40 hover:border-brass hover:bg-white transition-colors">
+    <Link href={href} className="card-lift group border border-ink/12 p-6 bg-white/40 hover:border-brass hover:bg-white">
       <h3 className="font-medium text-ink mb-1.5">{title}</h3>
       <p className="text-sm text-ink/60 leading-relaxed mb-3">{body}</p>
-      <span className="text-sm text-brass-dark font-medium">Go</span>
+      <span className="flex items-center gap-1.5 text-sm text-brass-dark font-medium">
+        Go <ArrowRightIcon className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+      </span>
     </Link>
   );
 }
 
-// Abstract stand-in for a hero photograph: four offset "plates" evoking
-// CMYK color separation on a press sheet — grounded in the actual craft
-// rather than a generic gradient blob.
-function HeroMark() {
+function StarIcon({ filled }) {
   return (
-    <svg viewBox="0 0 480 520" className="w-full h-auto" role="img" aria-label="Layered color-separation illustration">
-      <rect width="480" height="520" fill="#EDE6D6" />
-      <g opacity="0.9">
-        <rect x="70" y="70" width="260" height="340" fill="#12213A" opacity="0.85" />
-        <rect x="100" y="100" width="260" height="340" fill="#B23A2E" opacity="0.55" style={{ mixBlendMode: 'multiply' }} />
-        <rect x="130" y="130" width="260" height="340" fill="#C08A2E" opacity="0.6" style={{ mixBlendMode: 'multiply' }} />
-        <rect x="160" y="160" width="260" height="340" fill="#EDE6D6" opacity="0.35" style={{ mixBlendMode: 'multiply' }} />
-      </g>
-      <g stroke="#12213A" strokeWidth="1" opacity="0.4">
-        <line x1="160" y1="40" x2="160" y2="480" />
-        <line x1="40" y1="160" x2="440" y2="160" />
-      </g>
-      <circle cx="160" cy="160" r="16" fill="none" stroke="#B23A2E" strokeWidth="1.5" />
-      <line x1="160" y1="142" x2="160" y2="178" stroke="#B23A2E" strokeWidth="1.2" />
-      <line x1="142" y1="160" x2="178" y2="160" stroke="#B23A2E" strokeWidth="1.2" />
+    <svg viewBox="0 0 20 20" className={`w-4 h-4 ${filled ? 'text-brass' : 'text-ink/15'}`} fill="currentColor">
+      <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.7l6.1-.6z" />
     </svg>
+  );
+}
+
+// A framed grid of real product illustrations — replaces the old abstract
+// CMYK-plate motif with imagery that actually shows what the press makes.
+function HeroCollage() {
+  const items = [
+    { icon: 'card', label: 'Business cards' },
+    { icon: 'banner', label: 'Flex banners' },
+    { icon: 'box', label: 'Packaging' },
+    { icon: 'book', label: 'Albums & books' },
+    { icon: 'stamp', label: 'Stamps' },
+    { icon: 'idcard', label: 'ID cards' },
+  ];
+  return (
+    <div className="bg-paper-dark p-8 sm:p-10">
+      <div className="grid grid-cols-3 gap-4 sm:gap-6">
+        {items.map((item, i) => (
+          <div
+            key={item.icon}
+            className="aspect-square bg-white/70 border border-ink/8 flex flex-col items-center justify-center gap-2 p-3 animate-fade-up"
+            style={{ animationDelay: `${180 + i * 60}ms` }}
+          >
+            <div className="w-9 h-9 sm:w-11 sm:h-11 text-ink/75">
+              <ProductIllustration icon={item.icon} className="w-full h-full" />
+            </div>
+            <span className="text-[10px] sm:text-xs text-ink/55 text-center leading-tight">{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

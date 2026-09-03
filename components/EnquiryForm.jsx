@@ -7,6 +7,7 @@ import { categories } from '@/lib/content';
 export default function EnquiryForm() {
   const searchParams = useSearchParams();
   const presetCategory = searchParams.get('category') || '';
+  const presetProduct = searchParams.get('product') || '';
 
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
@@ -110,6 +111,7 @@ export default function EnquiryForm() {
           name="message"
           required
           className="field-textarea"
+          defaultValue={presetProduct ? `I'm interested in ${presetProduct}. ` : ''}
           placeholder="Describe the product, size, material, finish, and any reference you have."
         />
       </div>
