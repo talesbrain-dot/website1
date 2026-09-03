@@ -1,6 +1,6 @@
 import ContactForm from '@/components/ContactForm';
 import { contactInfo } from '@/lib/content';
-import { PhoneIcon, MailIcon, MapPinIcon, WhatsAppIcon } from '@/components/icons';
+import { PhoneIcon, MailIcon, MapPinIcon, WhatsAppIcon, InstagramIcon, FacebookIcon } from '@/components/icons';
 
 export const metadata = {
   title: 'Contact | Kamboj Press',
@@ -50,13 +50,37 @@ export default function ContactPage() {
           </div>
         </dl>
 
-        <div className="flex flex-wrap gap-4 mb-10">
+        <div className="flex flex-wrap gap-4 mb-8">
           <a href={contactInfo.whatsapp} target="_blank" rel="noreferrer" className="btn-outline">
             <WhatsAppIcon className="w-4 h-4" /> WhatsApp us
           </a>
           <a href={contactInfo.mapsUrl} target="_blank" rel="noreferrer" className="btn-outline">
             <MapPinIcon className="w-4 h-4" /> Get directions
           </a>
+        </div>
+
+        <div className="mb-10">
+          <p className="text-xs text-ink/50 mb-3">Follow us</p>
+          <div className="flex items-center gap-3">
+            <a
+              href={contactInfo.instagram}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Kamboj Press on Instagram"
+              className="w-10 h-10 flex items-center justify-center border border-ink/15 rounded-full text-ink/60 hover:text-brass-dark hover:border-brass transition-colors"
+            >
+              <InstagramIcon className="w-[18px] h-[18px]" />
+            </a>
+            <a
+              href={contactInfo.facebook}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Kamboj Press on Facebook"
+              className="w-10 h-10 flex items-center justify-center border border-ink/15 rounded-full text-ink/60 hover:text-brass-dark hover:border-brass transition-colors"
+            >
+              <FacebookIcon className="w-[18px] h-[18px]" />
+            </a>
+          </div>
         </div>
 
         <div className="crop-frame border border-ink/10 h-[260px] overflow-hidden">
