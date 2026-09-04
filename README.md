@@ -67,7 +67,37 @@ npm run dev
 
 Visit `http://localhost:3000`.
 
-## 3. Admin login
+## 3. Google login (optional but recommended)
+
+The login page has a "Continue with Google" button already built. To make
+it work, you need to enable Google as a provider in Supabase — a few steps,
+one-time setup:
+
+1. **Google Cloud Console** → [console.cloud.google.com](https://console.cloud.google.com) →
+   create a project (or use an existing one) → **APIs & Services →
+   Credentials → Create Credentials → OAuth client ID**.
+   - Application type: **Web application**
+   - Under **Authorized redirect URIs**, add:
+     `https://<your-project-ref>.supabase.co/auth/v1/callback`
+     (find your exact project ref in the Supabase dashboard URL, or under
+     Project Settings → API)
+   - Save — you'll get a **Client ID** and **Client Secret**.
+
+2. **Supabase dashboard** → **Authentication → Providers → Google** →
+   toggle it on → paste the **Client ID** and **Client Secret** from step 1
+   → Save.
+
+3. That's it — no code changes or env vars needed on your end for this
+   part, it's all configured inside Supabase. Once both steps above are
+   saved, the "Continue with Google" button on `/account/login` will work
+   immediately (next deploy isn't even required, since it's a Supabase-side
+   setting, not an env var).
+
+4. For production, also add your live domain (e.g. `https://kambojpress.com`)
+   under Google Cloud Console → your OAuth client → **Authorized JavaScript
+   origins**, so Google doesn't block the redirect from your real domain.
+
+## 4. Admin login
 
 Go to `yoursite.com/admin/login` (also linked at the bottom of every page
 footer as "Staff login") and sign in with `ADMIN_PASSWORD`.
@@ -75,7 +105,7 @@ footer as "Staff login") and sign in with `ADMIN_PASSWORD`.
 To change the password later, update `ADMIN_PASSWORD` in Vercel and
 redeploy — no code changes needed.
 
-## 4. Deploy to Vercel
+## 5. Deploy to Vercel
 
 1. Push this project to a GitHub repo and import it into Vercel (or run
    `vercel` from this folder).
@@ -100,7 +130,7 @@ endpoint on a schedule (a free service like cron-job.org works fine — just
 point it at `https://yoursite.com/api/cron/keep-alive` with an
 `Authorization: Bearer <CRON_SECRET>` header).
 
-## 5. Images
+## 6. Images
 
 The current build uses a designed color/shape motif instead of photos, since
 no product photography was provided. To add real photos:

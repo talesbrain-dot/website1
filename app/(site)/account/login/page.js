@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabasePublic } from '@/lib/supabasePublicClient';
+import { GoogleIcon } from '@/components/icons';
 
 function LoginSignupForm() {
   const router = useRouter();
@@ -62,6 +63,26 @@ function LoginSignupForm() {
     }
     router.push(next);
     router.refresh();
+  }
+
+  async function handleGoogleAuth() {
+    setError('');
+    setNotice('');
+    const supabase = getSupabasePublic();
+    if (!supabase) {
+      setError('Login is not set up on this site yet — please contact the site owner.');
+      return;
+    }
+    // Full page redirect to Google, then back to `next` — the AuthProvider
+    // mounted site-wide picks up the new session automatically on return,
+    // no separate callback page needed.
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}${next}` },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+    }
   }
 
   return (
@@ -123,6 +144,21 @@ function LoginSignupForm() {
               placeholder="Your name"
             />
           </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleAuth}
+          className="w-full flex items-center justify-center gap-3 border border-ink/15 rounded-sm py-2.5 mb-5 text-sm font-medium text-ink/80 bg-white hover:border-ink/30 hover:-translate-y-0.5 hover:shadow-[0_4px_10px_-4px_rgba(18,33,58,0.2)] active:translate-y-0 transition-all duration-150"
+        >
+          <GoogleIcon className="w-[18px] h-[18px]" />
+          Continue with Google
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <span className="h-px flex-1 bg-ink/10" />
+          <span className="text-xs text-ink/40">or use email</span>
+          <span className="h-px flex-1 bg-ink/10" />
         </div>
 
         <div className="mb-4">
