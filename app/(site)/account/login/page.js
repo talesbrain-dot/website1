@@ -26,6 +26,11 @@ function LoginSignupForm() {
     setNotice('');
 
     const supabase = getSupabasePublic();
+    if (!supabase) {
+      setError('Login is not set up on this site yet — please contact the site owner.');
+      setStatus('error');
+      return;
+    }
 
     if (mode === 'signup') {
       const { data, error: signUpError } = await supabase.auth.signUp({

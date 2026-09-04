@@ -11,7 +11,7 @@ export default function EnquiryForm() {
   const searchParams = useSearchParams();
   const presetCategory = searchParams.get('category') || '';
   const presetProduct = searchParams.get('product') || '';
-  const { user, loading } = useAuth();
+  const { user, loading, configError } = useAuth();
 
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
@@ -28,6 +28,11 @@ export default function EnquiryForm() {
 
     const form = e.target;
     const supabase = getSupabasePublic();
+    if (!supabase) {
+      setError('Login is not set up on this site yet — please contact the site owner.');
+      setStatus('error');
+      return;
+    }
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
 
@@ -69,6 +74,22 @@ export default function EnquiryForm() {
 
   if (loading) {
     return <p className="text-sm text-ink/50">Loading…</p>;
+  }
+
+  if (configError) {
+    return (
+      <div className="border border-registration/30 bg-registration/5 p-7">
+        <h3 className="font-display text-xl text-ink mb-2">Login is not set up yet</h3>
+        <p className="text-ink/70 leading-relaxed">
+          This site&rsquo;s login system needs a couple of environment variables configured before
+          enquiries can be submitted. If you&rsquo;re the site owner, check the README for
+          <code className="mx-1 text-xs bg-ink/5 px-1.5 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code>
+          and
+          <code className="mx-1 text-xs bg-ink/5 px-1.5 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+          Meanwhile, feel free to <a href="tel:7300760078" className="text-brass-dark font-medium">call us directly</a>.
+        </p>
+      </div>
+    );
   }
 
   if (!user) {

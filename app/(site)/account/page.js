@@ -29,6 +29,10 @@ export default function AccountPage() {
     if (!user) return;
     (async () => {
       const supabase = getSupabasePublic();
+      if (!supabase) {
+        setLoadingSubs(false);
+        return;
+      }
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) return;

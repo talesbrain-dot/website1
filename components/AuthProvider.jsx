@@ -3,14 +3,23 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getSupabasePublic } from '@/lib/supabasePublicClient';
 
-const AuthContext = createContext({ user: null, loading: true, signOut: async () => {} });
+const AuthContext = createContext({ user: null, loading: true, configError: false, signOut: async () => {} });
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [configError, setConfigError] = useState(false);
 
   useEffect(() => {
     const supabase = getSupabasePublic();
+
+    if (!supabase) {
+      // Env vars missing — degrade to "logged out" instead of crashing
+      // the whole site. Login/enquiry pages will show a clear message.
+      setConfigError(true);
+      setLoading(false);
+      return;
+    }
 
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
@@ -26,12 +35,13 @@ export function AuthProvider({ children }) {
 
   async function signOut() {
     const supabase = getSupabasePublic();
+    if (!supabase) return;
     await supabase.auth.signOut();
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, configError, signOut }}>
       {children}
     </AuthContext.Provider>
   );
