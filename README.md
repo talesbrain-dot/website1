@@ -15,10 +15,13 @@ from auto-pausing.
 - **Admin panel** (`/admin`) — password-protected. View every enquiry/contact
   message, filter by status or type, search, mark items as
   new / contacted / closed.
+- **Customer accounts** (`/account`) — customers sign up / log in (Supabase
+  Auth) before they can submit an enquiry, and can see all their past
+  enquiries and each one's status under "My Account". The contact page's
+  quick message form does not require login — only the full enquiry form
+  does.
 - **Keep-alive cron** — a scheduled job pings the database twice a week so
   Supabase's free tier never auto-pauses from inactivity.
-- No customer account system (the old site's "My Account" / customer login)
-  — this build focuses on the public site + staff-facing admin panel.
 
 ## 1. Create your Supabase project
 
@@ -27,13 +30,21 @@ from auto-pausing.
 2. Once it's created, open **SQL Editor** in the sidebar, paste the contents
    of `supabase/schema.sql` from this project, and click **Run**. This
    creates the `submissions` table and a small `keep_alive` table, once.
-3. Go to **Project Settings → API**. You'll need two values from here:
-   - **Project URL** → `SUPABASE_URL`
+3. Go to **Project Settings → API**. You'll need three values from here:
+   - **Project URL** → used for both `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_URL`
    - **service_role key** (not the `anon` key) → `SUPABASE_SERVICE_ROLE_KEY`
+   - **anon / public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 Keep the service_role key secret — it has full database access. It's only
 ever used inside server-side API routes in this project, never sent to the
-browser.
+browser. The anon key is different — it's *meant* to be public and is what
+powers customer login/signup in the browser.
+
+4. Customer sign-up sends a confirmation email by default. For local testing
+   this is extra friction — you can turn it off in **Authentication →
+   Providers → Email → "Confirm email"** (toggle off) so new accounts can log
+   in immediately. Turn it back on before going live if you want verified
+   emails.
 
 ## 2. Local setup
 
@@ -47,6 +58,7 @@ Fill in `.env.local`:
 - `ADMIN_PASSWORD` — the password you'll use to log into `/admin`.
 - `ADMIN_SESSION_SECRET` — any long random string (`openssl rand -hex 32`).
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — from step 1.
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from step 1 (powers customer login).
 - `CRON_SECRET` — any long random string; protects the keep-alive endpoint.
 
 ```bash
@@ -67,9 +79,10 @@ redeploy — no code changes needed.
 
 1. Push this project to a GitHub repo and import it into Vercel (or run
    `vercel` from this folder).
-2. In **Project → Settings → Environment Variables**, add the same four
+2. In **Project → Settings → Environment Variables**, add all the
    variables from your `.env.local` (`ADMIN_PASSWORD`,
    `ADMIN_SESSION_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
    `CRON_SECRET`).
 3. Redeploy.
 

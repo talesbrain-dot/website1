@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { contactInfo } from '@/lib/content';
 import { PhoneIcon, MailIcon } from '@/components/icons';
+import { useAuth } from '@/components/AuthProvider';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -19,6 +20,7 @@ const navLinks = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     setOpen(false);
@@ -72,6 +74,17 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+          {!loading && (
+            <Link
+              href={user ? '/account' : '/account/login'}
+              className="hidden sm:flex items-center gap-2 text-sm font-medium text-ink/70 hover:text-ink transition-colors"
+            >
+              <span className="w-7 h-7 rounded-full bg-ink/8 flex items-center justify-center text-xs font-semibold text-ink/70">
+                {user ? (user.user_metadata?.full_name?.[0] || user.email[0]).toUpperCase() : '·'}
+              </span>
+              {user ? 'My Account' : 'Log in'}
+            </Link>
+          )}
           <Link href="/enquiry" className="hidden sm:inline-flex btn-primary !px-5 !py-2.5 text-sm">
             Start an enquiry
           </Link>
@@ -106,6 +119,11 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          {!loading && (
+            <Link href={user ? '/account' : '/account/login'} className="py-2.5 text-ink/85 font-medium border-b border-ink/5">
+              {user ? 'My Account' : 'Log in / Sign up'}
+            </Link>
+          )}
           <Link href="/enquiry" className="btn-primary justify-center mt-3 text-sm">
             Start an enquiry
           </Link>

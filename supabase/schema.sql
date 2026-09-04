@@ -4,6 +4,7 @@
 create table if not exists submissions (
   id bigint generated always as identity primary key,
   type varchar(20) not null,              -- 'enquiry' | 'contact'
+  user_id uuid references auth.users(id) on delete set null,
   name varchar(200) not null,
   phone varchar(40),
   email varchar(200),
@@ -14,6 +15,13 @@ create table if not exists submissions (
   status varchar(20) not null default 'new',  -- 'new' | 'contacted' | 'closed'
   created_at timestamptz not null default now()
 );
+
+create index if not exists submissions_user_id_idx on submissions (user_id);
+
+-- If you already ran an earlier version of this file (before user_id
+-- existed), this adds the column without touching your existing data.
+-- Safe to run again — it's a no-op if the column is already there.
+alter table submissions add column if not exists user_id uuid references auth.users(id) on delete set null;
 
 create index if not exists submissions_created_at_idx on submissions (created_at desc);
 create index if not exists submissions_status_idx on submissions (status);

@@ -1,16 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { categories } from '@/lib/content';
+import { useAuth } from '@/components/AuthProvider';
+import { getSupabasePublic } from '@/lib/supabasePublicClient';
 
 export default function EnquiryForm() {
   const searchParams = useSearchParams();
   const presetCategory = searchParams.get('category') || '';
   const presetProduct = searchParams.get('product') || '';
+  const { user, loading } = useAuth();
 
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
+
+  // Selected option carries "category" (a whole category, e.g. for a
+  // custom/unlisted need) or an exact product name — both are valid,
+  // matching what the enquiry is actually about.
+  const preset = presetProduct || presetCategory;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -18,6 +27,16 @@ export default function EnquiryForm() {
     setError('');
 
     const form = e.target;
+    const supabase = getSupabasePublic();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+
+    if (!token) {
+      setError('Your session has expired — please log in again.');
+      setStatus('error');
+      return;
+    }
+
     const payload = {
       name: form.name.value,
       phone: form.phone.value,
@@ -31,7 +50,7 @@ export default function EnquiryForm() {
     try {
       const res = await fetch('/api/enquiry', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -48,13 +67,37 @@ export default function EnquiryForm() {
     }
   }
 
+  if (loading) {
+    return <p className="text-sm text-ink/50">Loading…</p>;
+  }
+
+  if (!user) {
+    return (
+      <div className="border border-brass/40 bg-brass/10 p-7">
+        <h3 className="font-display text-xl text-ink mb-2">Log in to send an enquiry</h3>
+        <p className="text-ink/70 leading-relaxed mb-5">
+          A free account lets us match your enquiry to you and lets you track its status under
+          &ldquo;My Account&rdquo; — it only takes a minute.
+        </p>
+        <Link
+          href={{ pathname: '/account/login', query: { next: '/enquiry', ...(presetCategory && { category: presetCategory }), ...(presetProduct && { product: presetProduct }) } }}
+          className="btn-primary"
+        >
+          Log in / Sign up
+        </Link>
+      </div>
+    );
+  }
+
   if (status === 'success') {
     return (
       <div className="border border-brass/40 bg-brass/10 p-7">
         <h3 className="font-display text-xl text-ink mb-2">Enquiry received.</h3>
         <p className="text-ink/70 leading-relaxed">
           Thanks — we&rsquo;ll review your requirement and get back to you with guidance and a
-          quote. For anything urgent, call us directly at{' '}
+          quote. You can track it anytime under{' '}
+          <Link href="/account" className="text-brass-dark font-medium">My Account</Link>. For
+          anything urgent, call us directly at{' '}
           <a href="tel:7300760078" className="text-brass-dark font-medium">7300760078</a>.
         </p>
         <button onClick={() => setStatus('idle')} className="text-sm font-medium text-brass-dark mt-5 border-b border-brass">
@@ -69,7 +112,14 @@ export default function EnquiryForm() {
       <div className="grid sm:grid-cols-2 gap-5">
         <div>
           <label className="field-label" htmlFor="name">Name</label>
-          <input id="name" name="name" required className="field-input" placeholder="Your full name" />
+          <input
+            id="name"
+            name="name"
+            required
+            defaultValue={user.user_metadata?.full_name || ''}
+            className="field-input"
+            placeholder="Your full name"
+          />
         </div>
         <div>
           <label className="field-label" htmlFor="phone">Phone</label>
@@ -79,17 +129,29 @@ export default function EnquiryForm() {
 
       <div>
         <label className="field-label" htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" className="field-input" placeholder="you@example.com" />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          defaultValue={user.email || ''}
+          className="field-input"
+          placeholder="you@example.com"
+        />
         <p className="text-xs text-ink/45 mt-1.5">Provide a phone number or an email so we can reach you.</p>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-5">
         <div className="sm:col-span-1">
-          <label className="field-label" htmlFor="category">Category</label>
-          <select id="category" name="category" defaultValue={presetCategory} className="field-input">
-            <option value="">Select a category</option>
-            {categories.map((c) => (
-              <option key={c.slug} value={c.label}>{c.label}</option>
+          <label className="field-label" htmlFor="category">Product / category</label>
+          <select id="category" name="category" defaultValue={preset} className="field-input">
+            <option value="">Select what you need</option>
+            {categories.map((cat) => (
+              <optgroup key={cat.slug} label={cat.label}>
+                <option value={cat.label}>{cat.label} (general)</option>
+                {cat.items.map((item) => (
+                  <option key={item.slug} value={item.name}>{item.name}</option>
+                ))}
+              </optgroup>
             ))}
             <option value="Not sure / custom">Not sure / custom job</option>
           </select>
