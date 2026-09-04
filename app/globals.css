@@ -99,15 +99,44 @@ body {
 }
 
 .btn-primary {
-  @apply inline-flex items-center gap-2 bg-brass text-ink-dark font-semibold px-6 py-3 rounded-sm shadow-[0_2px_0_0_rgba(150,105,30,0.6)] hover:bg-brass-light hover:-translate-y-0.5 hover:shadow-[0_4px_10px_-2px_rgba(18,33,58,0.35)] active:translate-y-0 active:shadow-[0_1px_0_0_rgba(150,105,30,0.6)] transition-all duration-150;
+  @apply inline-flex items-center gap-2 bg-brass text-ink-dark font-semibold px-6 py-3 rounded-sm transition-all duration-150;
+  box-shadow: 0 2px 0 0 rgba(150, 105, 30, 0.6);
+}
+.btn-primary:hover {
+  background-color: #DCAF5C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px -2px rgba(18, 33, 58, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 0 0 rgba(150, 105, 30, 0.6);
+}
+.btn-primary:disabled {
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-outline {
-  @apply inline-flex items-center gap-2 border border-ink/25 text-ink font-medium px-6 py-3 rounded-sm hover:border-ink hover:-translate-y-0.5 hover:shadow-[0_4px_10px_-4px_rgba(18,33,58,0.25)] active:translate-y-0 transition-all duration-150;
+  @apply inline-flex items-center gap-2 border border-ink/25 text-ink font-medium px-6 py-3 rounded-sm transition-all duration-150;
+}
+.btn-outline:hover {
+  border-color: #12213A;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px -4px rgba(18, 33, 58, 0.25);
+}
+.btn-outline:active {
+  transform: translateY(0);
 }
 
 .btn-ghost-paper {
-  @apply inline-flex items-center gap-2 border border-paper/40 text-paper font-medium px-6 py-3 rounded-sm hover:bg-paper/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150;
+  @apply inline-flex items-center gap-2 border border-paper/40 text-paper font-medium px-6 py-3 rounded-sm transition-all duration-150;
+}
+.btn-ghost-paper:hover {
+  background-color: rgba(246, 243, 236, 0.1);
+  transform: translateY(-2px);
+}
+.btn-ghost-paper:active {
+  transform: translateY(0);
 }
 
 .field-label {
@@ -153,7 +182,10 @@ body {
 /* Layered "raised card" look for auth panels — real depth via stacked
    shadows + a soft top highlight, not just a flat border. */
 .card-3d {
-  @apply relative bg-white border border-ink/10 rounded-md;
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid rgba(18, 33, 58, 0.1);
+  border-radius: 8px;
   box-shadow:
     0 1px 0 0 rgba(255, 255, 255, 0.6) inset,
     0 18px 40px -18px rgba(18, 33, 58, 0.35),
@@ -163,7 +195,9 @@ body {
 .card-3d::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 4px;
   border-radius: 6px 6px 0 0;
   background: linear-gradient(90deg, #12213A, #C08A2E 55%, #B23A2E);
@@ -171,9 +205,19 @@ body {
 
 /* Sliding pill background behind the login/signup tab toggle */
 .tab-slider {
-  @apply relative border border-ink/12 rounded-sm p-1 bg-paper-dark/50;
+  position: relative;
+  display: flex;
+  border: 1px solid rgba(18, 33, 58, 0.12);
+  border-radius: 2px;
+  padding: 4px;
+  background-color: rgba(237, 230, 214, 0.5);
 }
 .tab-slider-thumb {
-  @apply absolute top-1 bottom-1 rounded-sm bg-ink transition-transform duration-300 ease-out;
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 2px;
+  background-color: #12213A;
+  transition: transform 0.3s ease-out;
   width: calc(50% - 4px);
 }
