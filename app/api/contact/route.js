@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { insertSubmission } from '@/lib/db';
+import { notifyNewSubmission } from '@/lib/notify';
 
 export async function POST(request) {
   let body;
@@ -32,6 +33,18 @@ export async function POST(request) {
       email: email ? String(email).trim().slice(0, 200) : null,
       message: String(message).trim().slice(0, 4000),
     });
+
+    await notifyNewSubmission({
+      type: 'contact',
+      name: String(name).trim(),
+      phone: phone ? String(phone).trim() : null,
+      email: email ? String(email).trim() : null,
+      category: null,
+      quantity: null,
+      deadline: null,
+      message: String(message).trim(),
+    });
+
     return NextResponse.json({ ok: true, id: saved.id }, { status: 201 });
   } catch (err) {
     console.error('contact insert failed', err);

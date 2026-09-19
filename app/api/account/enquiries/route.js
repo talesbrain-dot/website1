@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '@/lib/supabaseClient';
+import { attachArtworkUrls } from '@/lib/db';
 
 async function getUserFromRequest(request) {
   const authHeader = request.headers.get('authorization') || '';
@@ -32,7 +33,8 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return NextResponse.json({ submissions: data });
+    const withArtwork = await attachArtworkUrls(data);
+    return NextResponse.json({ submissions: withArtwork });
   } catch (err) {
     console.error('my enquiries fetch failed', err);
     return NextResponse.json({ error: 'Could not load your enquiries.' }, { status: 500 });

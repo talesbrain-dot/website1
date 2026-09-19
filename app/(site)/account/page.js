@@ -6,12 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { getSupabasePublic } from '@/lib/supabasePublicClient';
 import { ProductIllustration } from '@/components/ProductIcons';
-
-const STATUS_STYLES = {
-  new: 'bg-registration/10 text-registration',
-  contacted: 'bg-brass/10 text-brass-dark',
-  closed: 'bg-ink/8 text-ink/60',
-};
+import { STATUS_STYLES, STATUS_LABELS } from '@/lib/statuses';
 
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth();
@@ -118,7 +113,7 @@ export default function AccountPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   {s.category && <span className="text-sm font-medium text-ink">{s.category}</span>}
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[s.status]}`}>{s.status}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[s.status]}`}>{STATUS_LABELS[s.status] || s.status}</span>
                 </div>
                 <p className="text-sm text-ink/65 leading-relaxed">{s.message}</p>
                 <p className="text-xs text-ink/40 mt-2">
@@ -126,6 +121,16 @@ export default function AccountPage() {
                   {s.quantity ? ` · Qty: ${s.quantity}` : ''}
                   {s.deadline ? ` · By: ${s.deadline}` : ''}
                 </p>
+                {s.artwork_url && (
+                  <a
+                    href={s.artwork_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block text-xs font-medium text-brass-dark border-b border-brass mt-2"
+                  >
+                    View your uploaded artwork
+                  </a>
+                )}
               </div>
             </div>
           ))}

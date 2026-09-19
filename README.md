@@ -13,13 +13,33 @@ from auto-pausing.
 - **Enquiry & contact forms** — validated client + server side, saved to
   Supabase.
 - **Admin panel** (`/admin`) — password-protected. View every enquiry/contact
-  message, filter by status or type, search, mark items as
-  new / contacted / closed.
-- **Customer accounts** (`/account`) — customers sign up / log in (Supabase
-  Auth) before they can submit an enquiry, and can see all their past
-  enquiries and each one's status under "My Account". The contact page's
-  quick message form does not require login — only the full enquiry form
-  does.
+  message, filter by status or type, search, and move each one through
+  clear stages: New → Quoted → Confirmed → Printing → Ready for pickup →
+  Delivered (or Cancelled) — same simple one-click dropdown as before, just
+  with stages that actually match how a print job moves.
+- **Admin analytics** — a small panel on the admin dashboard showing which
+  product categories are getting the most enquiries, so you can see demand
+  at a glance without any separate reporting tool.
+- **Instant alerts on new enquiries** — optionally get an email (and/or a
+  personal WhatsApp message) the moment someone submits the enquiry or
+  contact form, instead of needing to check the admin panel manually. Both
+  are optional and off by default until configured — see "Alerts" below.
+- **SEO basics** — a generated sitemap.xml and robots.txt, plus
+  LocalBusiness structured data (name, address, phone, hours) so Google
+  can show a richer result for searches like "printing press dehradun".
+- **Customer accounts** (`/account`) — customers sign up / log in (email +
+  password or Google) before they can submit an enquiry, and can see all
+  their past enquiries and each one's status under "My Account". The
+  contact page's quick message form does not require login — only the full
+  enquiry form does.
+- **Artwork upload** — customers can attach a design file (JPG, PNG, PDF,
+  AI, EPS, PSD, CDR, SVG — up to 15MB) with their enquiry, stored privately
+  in Supabase Storage. Admins get a signed download link for each file in
+  the admin panel; customers see the same link under "My Account".
+- **WhatsApp number required** — the enquiry form requires a WhatsApp
+  number (not just any phone/email) so the team can always reach a
+  customer; email stays optional as a backup contact method. The admin
+  panel's phone number is a direct WhatsApp chat link.
 - **Keep-alive cron** — a scheduled job pings the database twice a week so
   Supabase's free tier never auto-pauses from inactivity.
 
@@ -29,7 +49,14 @@ from auto-pausing.
    (no credit card needed).
 2. Once it's created, open **SQL Editor** in the sidebar, paste the contents
    of `supabase/schema.sql` from this project, and click **Run**. This
-   creates the `submissions` table and a small `keep_alive` table, once.
+   creates the `submissions` table, a small `keep_alive` table, and a
+   private `artwork` storage bucket for uploaded design files (with the
+   access rules that let customers upload only into their own folder).
+   **Already ran this before?** The file is safe to run again — re-run it
+   any time this project updates `supabase/schema.sql`, so any new columns
+   or the storage bucket get added without touching your existing data. If
+   you ever see a database error mentioning a missing column, this is the
+   fix — re-run this file.
 3. Go to **Project Settings → API**. You'll need three values from here:
    - **Project URL** → used for both `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_URL`
    - **service_role key** (not the `anon` key) → `SUPABASE_SERVICE_ROLE_KEY`
@@ -60,6 +87,10 @@ Fill in `.env.local`:
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — from step 1.
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from step 1 (powers customer login).
 - `CRON_SECRET` — any long random string; protects the keep-alive endpoint.
+- `NEXT_PUBLIC_SITE_URL` — your site's URL, used for SEO (see step 6). Fine
+  to leave as `http://localhost:3000` for local dev.
+- Alert variables (`RESEND_API_KEY`, `ADMIN_ALERT_EMAIL`,
+  `WHATSAPP_ALERT_PHONE`, `WHATSAPP_ALERT_APIKEY`) are optional — see step 5.
 
 ```bash
 npm run dev
@@ -105,7 +136,47 @@ footer as "Staff login") and sign in with `ADMIN_PASSWORD`.
 To change the password later, update `ADMIN_PASSWORD` in Vercel and
 redeploy — no code changes needed.
 
-## 5. Deploy to Vercel
+## 5. Alerts on new enquiries (optional)
+
+Without any setup here, everything still works — you just find out about
+new enquiries by checking `/admin`. Either or both of these can be added:
+
+**Email** (via [Resend](https://resend.com), free):
+1. Sign up at resend.com with the email you want alerts sent to.
+2. **API Keys** → create one → copy it into `RESEND_API_KEY`.
+3. Set `ADMIN_ALERT_EMAIL` to that same email address. On Resend's free
+   plan (no domain verified), you can only send *to* the address you
+   signed up with — which is exactly what you want here.
+4. Leave `RESEND_FROM_EMAIL` as the default unless you've verified your
+   own domain in Resend (Domains tab) and want alerts to come from
+   `you@yourdomain.com` instead.
+
+**WhatsApp** (via [CallMeBot](https://www.callmebot.com/blog/free-api-whatsapp-messages/),
+free, unofficial — sends a message to yourself, not to customers):
+1. Save `+34 644 55 71 43` as a contact in the WhatsApp you want alerts on.
+2. Message it exactly: `I allow callmebot to send me messages`
+3. It replies with an API key. Set `WHATSAPP_ALERT_PHONE` (your number with
+   country code, no `+` or spaces — e.g. `917300760078`) and
+   `WHATSAPP_ALERT_APIKEY` to that key.
+
+Add whichever of these you set up to Vercel's environment variables too,
+then redeploy.
+
+## 6. SEO
+
+Set `NEXT_PUBLIC_SITE_URL` (in `.env.local` and in Vercel) to your real
+site URL, e.g. `https://kambojpress.vercel.app` or your custom domain once
+you have one. This is used to:
+- Generate `/sitemap.xml` (every page, including each individual product page)
+- Generate `/robots.txt` (allows the public site, blocks `/admin`, `/account`, `/api`)
+- Fill in the LocalBusiness structured data Google uses for rich results
+
+No further setup needed — both files are generated automatically from
+`app/sitemap.js` and `app/robots.js`. Once live, you can submit the
+sitemap URL in [Google Search Console](https://search.google.com/search-console)
+to speed up indexing.
+
+## 7. Deploy to Vercel
 
 1. Push this project to a GitHub repo and import it into Vercel (or run
    `vercel` from this folder).
@@ -113,7 +184,8 @@ redeploy — no code changes needed.
    variables from your `.env.local` (`ADMIN_PASSWORD`,
    `ADMIN_SESSION_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
    `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `CRON_SECRET`).
+   `CRON_SECRET`, `NEXT_PUBLIC_SITE_URL`, and the alert variables from
+   step 5 if you set those up).
 3. Redeploy.
 
 The Cron job in `vercel.json` is picked up automatically on deploy — no
@@ -130,7 +202,7 @@ endpoint on a schedule (a free service like cron-job.org works fine — just
 point it at `https://yoursite.com/api/cron/keep-alive` with an
 `Authorization: Bearer <CRON_SECRET>` header).
 
-## 6. Images
+## 8. Images
 
 The current build uses a designed color/shape motif instead of photos, since
 no product photography was provided. To add real photos:

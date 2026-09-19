@@ -1,21 +1,14 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const STATUS_OPTIONS = ['new', 'contacted', 'closed'];
-
-const STATUS_STYLES = {
-  new: 'bg-registration/10 text-registration border-registration/30',
-  contacted: 'bg-brass/10 text-brass-dark border-brass/30',
-  closed: 'bg-ink/8 text-ink/60 border-ink/15',
-};
+import { STATUSES, STATUS_STYLES } from '@/lib/statuses';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [submissions, setSubmissions] = useState([]);
-  const [counts, setCounts] = useState({ new: 0, contacted: 0, closed: 0, total: 0 });
+  const [counts, setCounts] = useState({ total: 0 });
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -53,6 +46,22 @@ export default function AdminDashboard() {
     return () => clearTimeout(timeout);
   }, [load, search]);
 
+  // Simple admin analytics — which categories/products are being asked
+  // about most, computed from whatever's currently loaded (the most
+  // recent 300 rows, or fewer if filtered). No separate endpoint needed.
+  const topCategories = useMemo(() => {
+    const freq = {};
+    submissions.forEach((s) => {
+      if (!s.category) return;
+      freq[s.category] = (freq[s.category] || 0) + 1;
+    });
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
+  }, [submissions]);
+
+  const maxCategoryCount = topCategories[0]?.[1] || 1;
+
   async function updateStatus(id, status) {
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
     try {
@@ -86,12 +95,45 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <CountCard label="Total" value={counts.total} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
-        <CountCard label="New" value={counts.new} active={statusFilter === 'new'} onClick={() => setStatusFilter('new')} accent="registration" />
-        <CountCard label="Contacted" value={counts.contacted} active={statusFilter === 'contacted'} onClick={() => setStatusFilter('contacted')} accent="brass" />
-        <CountCard label="Closed" value={counts.closed} active={statusFilter === 'closed'} onClick={() => setStatusFilter('closed')} />
+      <div className="flex flex-wrap gap-2 mb-8">
+        <StatusPill
+          label="All"
+          value={counts.total}
+          active={statusFilter === 'all'}
+          onClick={() => setStatusFilter('all')}
+        />
+        {STATUSES.map((s) => (
+          <StatusPill
+            key={s.value}
+            label={s.label}
+            value={counts[s.value] || 0}
+            active={statusFilter === s.value}
+            onClick={() => setStatusFilter(s.value)}
+            styles={STATUS_STYLES[s.value]}
+          />
+        ))}
       </div>
+
+      {topCategories.length > 0 && (
+        <div className="border border-ink/12 bg-white/40 p-5 mb-8">
+          <h2 className="text-sm font-semibold text-ink mb-4">Top requested categories</h2>
+          <div className="grid gap-2.5">
+            {topCategories.map(([category, count]) => (
+              <div key={category} className="flex items-center gap-3">
+                <span className="text-xs text-ink/60 w-40 shrink-0 truncate" title={category}>{category}</span>
+                <div className="flex-1 h-2 bg-ink/8 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-brass rounded-full"
+                    style={{ width: `${Math.max(6, (count / maxCategoryCount) * 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium text-ink/70 w-6 text-right shrink-0">{count}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-ink/40 mt-4">Based on the submissions currently loaded below.</p>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3 mb-6">
         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="field-input !w-auto text-sm">
@@ -110,7 +152,7 @@ export default function AdminDashboard() {
       {errorMsg && <p className="text-sm text-registration mb-4">{errorMsg}</p>}
 
       <div className="border border-ink/12 bg-white/40 overflow-x-auto">
-        <table className="w-full text-sm min-w-[820px]">
+        <table className="w-full text-sm min-w-[960px]">
           <thead>
             <tr className="border-b border-ink/12 text-left text-ink/55">
               <th className="px-4 py-3 font-medium">Received</th>
@@ -119,15 +161,16 @@ export default function AdminDashboard() {
               <th className="px-4 py-3 font-medium">Contact</th>
               <th className="px-4 py-3 font-medium">Details</th>
               <th className="px-4 py-3 font-medium">Message</th>
+              <th className="px-4 py-3 font-medium">Artwork</th>
               <th className="px-4 py-3 font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-ink/45">Loading…</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-ink/45">Loading…</td></tr>
             )}
             {!loading && submissions.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-ink/45">No submissions match these filters.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-ink/45">No submissions match these filters.</td></tr>
             )}
             {!loading && submissions.map((s) => (
               <tr key={s.id} className="border-b border-ink/8 align-top hover:bg-white/60">
@@ -137,7 +180,19 @@ export default function AdminDashboard() {
                 <td className="px-4 py-3 whitespace-nowrap capitalize text-ink/70">{s.type}</td>
                 <td className="px-4 py-3 font-medium text-ink whitespace-nowrap">{s.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  {s.phone && <div><a href={`tel:${s.phone}`} className="text-ink/75 hover:text-brass-dark">{s.phone}</a></div>}
+                  {s.phone && (
+                    <div>
+                      <a
+                        href={`https://wa.me/91${s.phone.replace(/\D/g, '').slice(-10)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-ink/75 hover:text-brass-dark"
+                        title="Message on WhatsApp"
+                      >
+                        {s.phone}
+                      </a>
+                    </div>
+                  )}
                   {s.email && <div><a href={`mailto:${s.email}`} className="text-ink/75 hover:text-brass-dark">{s.email}</a></div>}
                 </td>
                 <td className="px-4 py-3 text-ink/60 whitespace-nowrap">
@@ -148,14 +203,28 @@ export default function AdminDashboard() {
                 <td className="px-4 py-3 text-ink/70 max-w-[260px]">
                   <p className="line-clamp-3">{s.message}</p>
                 </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {s.artwork_url ? (
+                    <a
+                      href={s.artwork_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-medium text-brass-dark border-b border-brass pb-0.5"
+                    >
+                      Download
+                    </a>
+                  ) : (
+                    <span className="text-xs text-ink/30">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <select
                     value={s.status}
                     onChange={(e) => updateStatus(s.id, e.target.value)}
-                    className={`text-xs font-medium border rounded-sm px-2.5 py-1.5 ${STATUS_STYLES[s.status]}`}
+                    className={`text-xs font-medium border border-transparent rounded-sm px-2.5 py-1.5 ${STATUS_STYLES[s.status] || ''}`}
                   >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
+                    {STATUSES.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
                 </td>
@@ -168,15 +237,18 @@ export default function AdminDashboard() {
   );
 }
 
-function CountCard({ label, value, active, onClick, accent }) {
-  const accentColor = accent === 'registration' ? 'text-registration' : accent === 'brass' ? 'text-brass-dark' : 'text-ink';
+function StatusPill({ label, value, active, onClick, styles }) {
   return (
     <button
       onClick={onClick}
-      className={`text-left border p-4 transition-colors ${active ? 'border-brass bg-white' : 'border-ink/12 bg-white/40 hover:bg-white/70'}`}
+      className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border transition-colors ${
+        active
+          ? 'border-brass bg-white text-ink'
+          : `border-ink/12 bg-white/40 text-ink/60 hover:bg-white/70 ${styles || ''}`
+      }`}
     >
-      <div className={`font-display text-2xl font-medium ${accentColor}`}>{value}</div>
-      <div className="text-xs text-ink/55 mt-1">{label}</div>
+      {label}
+      <span className="text-xs font-semibold text-ink/50">{value}</span>
     </button>
   );
 }
