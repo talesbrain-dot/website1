@@ -1,3 +1,19 @@
+# Database setup for Kamboj Press website
+
+I'm setting up the database for my website, which is built on Next.js and
+Supabase (Postgres). I need to run one SQL script in the Supabase SQL
+Editor to create all the required tables, storage bucket, security
+policies, and real-time settings.
+
+Below is the complete SQL script. Please help me understand it if needed,
+or confirm it's safe to run — I'm going to paste this exact script into
+my Supabase project's **SQL Editor** (Dashboard → SQL Editor → New query),
+then click **Run**.
+
+It's written to be safe to run more than once (nothing gets duplicated or
+overwritten if I run it again later).
+
+```sql
 -- Run this in your Supabase project's SQL Editor
 -- (Dashboard -> SQL Editor -> New query -> paste -> Run).
 -- Safe to re-run any time — every statement below is written to be a
@@ -166,3 +182,28 @@ begin
     alter publication supabase_realtime add table chat_messages;
   end if;
 end $$;
+```
+
+## What this creates
+
+| Table | Purpose |
+|---|---|
+| `submissions` | Every enquiry and contact-form message from the website |
+| `keep_alive` | A tiny table a scheduled job writes to, so the free Supabase project never auto-pauses from inactivity |
+| `chat_threads` | One row per customer's chat conversation |
+| `chat_messages` | Every message inside a chat conversation |
+| `chat_settings` | The welcome message and away auto-reply text shown in the admin panel |
+
+Plus a private Storage bucket called `artwork` (for design files customers
+upload with an enquiry), and the security rules that keep each customer's
+data — chats, uploaded files — visible only to that customer and to the
+site's admin panel.
+
+## After running this
+
+1. Confirm it ran with no errors (Supabase shows a success message).
+2. No other manual setup is needed in Supabase for these tables — the
+   website's own code handles everything else.
+3. If anything changes about these tables in the future, I'll get an
+   updated version of this same script to run again — it's always safe to
+   re-run the whole thing.

@@ -91,6 +91,7 @@ export default function AdminDashboard() {
         </div>
         <div className="flex gap-3">
           <Link href="/" className="btn-outline !py-2 !px-4 text-sm">View site</Link>
+          <Link href="/admin/chat" className="btn-outline !py-2 !px-4 text-sm">Live chat</Link>
           <button onClick={handleLogout} className="btn-outline !py-2 !px-4 text-sm">Log out</button>
         </div>
       </div>

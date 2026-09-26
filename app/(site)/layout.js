@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
+import ChatWidget from '@/components/ChatWidget';
 import { AuthProvider } from '@/components/AuthProvider';
 
 export default function SiteLayout({ children }) {
@@ -10,6 +11,7 @@ export default function SiteLayout({ children }) {
       <main>{children}</main>
       <Footer />
       <WhatsAppFloat />
+      <ChatWidget />
     </AuthProvider>
   );
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { SESSION_COOKIE, verifySessionToken } from './lib/auth';
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/submissions/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/submissions/:path*', '/api/admin/chat/:path*'],
 };
 
 export async function middleware(request) {

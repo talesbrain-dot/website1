@@ -154,12 +154,12 @@ export default function HomePage() {
             <Link
               key={item.name}
               href={`/products/${item.slug}`}
-              className="card-lift group aspect-[4/5] bg-white/50 border border-ink/10 flex flex-col justify-between p-4 hover:border-brass"
+              className="card-lift group aspect-[4/5] bg-white/50 border border-ink/10 flex flex-col hover:border-brass overflow-hidden"
             >
-              <div className="w-9 h-9 text-ink/60 group-hover:text-brass-dark transition-colors">
+              <div className="flex-1 flex items-center justify-center p-6 text-ink/60 group-hover:text-brass-dark transition-colors">
                 <ProductIllustration icon={item.icon} className="w-full h-full" />
               </div>
-              <span className="text-sm font-medium text-ink">{item.name}</span>
+              <span className="text-sm font-medium text-ink px-4 pb-4">{item.name}</span>
             </Link>
           ))}
         </div>

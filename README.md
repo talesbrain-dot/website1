@@ -20,6 +20,13 @@ from auto-pausing.
 - **Admin analytics** — a small panel on the admin dashboard showing which
   product categories are getting the most enquiries, so you can see demand
   at a glance without any separate reporting tool.
+- **Live chat** — a chat widget on every page (bottom-left) where logged-in
+  customers can message you directly and see replies appear instantly,
+  no page refresh needed. The admin panel has a matching chat inbox
+  (`/admin/chat`) to reply. You can configure two automatic messages from
+  there: a welcome message sent the instant a new chat starts, and an
+  away/auto-reply message you can toggle on when you're not actively
+  answering (it only fires once per chat, before any admin has replied).
 - **Instant alerts on new enquiries** — optionally get an email (and/or a
   personal WhatsApp message) the moment someone submits the enquiry or
   contact form, instead of needing to check the admin panel manually. Both
@@ -49,14 +56,22 @@ from auto-pausing.
    (no credit card needed).
 2. Once it's created, open **SQL Editor** in the sidebar, paste the contents
    of `supabase/schema.sql` from this project, and click **Run**. This
-   creates the `submissions` table, a small `keep_alive` table, and a
+   creates the `submissions` table, the `chat_threads` / `chat_messages` /
+   `chat_settings` tables for live chat, a small `keep_alive` table, and a
    private `artwork` storage bucket for uploaded design files (with the
    access rules that let customers upload only into their own folder).
    **Already ran this before?** The file is safe to run again — re-run it
-   any time this project updates `supabase/schema.sql`, so any new columns
-   or the storage bucket get added without touching your existing data. If
-   you ever see a database error mentioning a missing column, this is the
-   fix — re-run this file.
+   any time this project updates `supabase/schema.sql` (for example, after
+   pulling an update that adds the chat feature), so any new tables,
+   columns, or the storage bucket get added without touching your existing
+   data. If you ever see a database error mentioning a missing table or
+   column, this is the fix — re-run this file.
+
+   The chat widget updates live using Supabase Realtime — this file already
+   enables it on the `chat_messages` table, so there's nothing extra to
+   turn on. If chat replies aren't appearing instantly for some reason,
+   check **Database → Replication** in the Supabase dashboard and confirm
+   `chat_messages` is listed under the `supabase_realtime` publication.
 3. Go to **Project Settings → API**. You'll need three values from here:
    - **Project URL** → used for both `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_URL`
    - **service_role key** (not the `anon` key) → `SUPABASE_SERVICE_ROLE_KEY`
